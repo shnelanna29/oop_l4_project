@@ -1,23 +1,36 @@
 <?php
 require 'db.php';
 
-$stmt = $pdo->query("SELECT id, user_id, course_id, review_text, rating, created_at FROM reviews");
-$reviews = $stmt->fetchAll();
-
-echo "<h2>Отзывы</h2><table border='1'><tr>
-<th>ID</th><th>Пользователь</th><th>Курс</th><th>Отзыв</th><th>Оценка</th><th>Дата</th>
-</tr>";
-
-foreach ($reviews as $review) {
-    echo "<tr>
-    <td>{$review['id']}</td>
-    <td>{$review['user_id']}</td>
-    <td>{$review['course_id']}</td>
-    <td>{$review['review_text']}</td>
-    <td>{$review['rating']}</td>
-    <td>{$review['created_at']}</td>
-    </tr>";
-}
-
-echo "</table><p><a href='index.php?page=admin'>Назад</a></p>";
+$stmt = $pdo->query("
+    SELECT v.id,
+           u.FIO AS user_fio,
+           c.cours_name,
+           v.date,
+           v.review_text
+    FROM review v
+    JOIN `user` u     ON v.user_fk    = u.id
+    JOIN request r    ON v.request_fk = r.id
+    JOIN cours_name c ON r.cours_fk   = c.id
+");
+$reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+<h2>Отзывы</h2>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Пользователь</th>
+        <th>Курс</th>
+        <th>Дата</th>
+        <th>Текст отзыва</th>
+    </tr>
+    <?php foreach ($reviews as $r): ?>
+        <tr>
+            <td><?= htmlspecialchars($r['id']) ?></td>
+            <td><?= htmlspecialchars($r['user_fio']) ?></td>
+            <td><?= htmlspecialchars($r['cours_name']) ?></td>
+            <td><?= htmlspecialchars($r['date']) ?></td>
+            <td><?= nl2br(htmlspecialchars($r['review_text'])) ?></td>
+        </tr>
+    <?php endforeach; ?>
+</table>
+<p><a href="index.php?page=admin">Назад</a></p>
