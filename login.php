@@ -1,13 +1,13 @@
 <?php
 session_start();
-require 'db.php';
+require_once 'db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $login = $_POST['login'] ?? '';
+    $login    = trim($_POST['login'] ?? '');
     $password = $_POST['password'] ?? '';
 
     if ($login === '' || $password === '') {
-        echo '<p>Введите логин и пароль.</p>';
+        echo "Введите логин и пароль.";
         exit;
     }
 
@@ -16,12 +16,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['role_id'] = $user['user_type_fk'];
-        echo '<p>Вы успешно вошли. <a href="index.php">На главную</a></p>';
+        $_SESSION['user_id']  = $user['id'];
+        $_SESSION['role_id']  = $user['user_type_fk'];
+        header("Location: index.php");
+        exit;
     } else {
-        echo '<p>Неверный логин или пароль.</p>';
+        echo "Неверный логин или пароль.";
+        echo '<br><a href="index.php?page=login">Назад</a>';
     }
 } else {
     header('Location: index.php?page=login');
+    exit;
 }

@@ -1,13 +1,14 @@
 <?php
-$host = '127.0.0.1';
-$dbname = 'lab3_oop'; // новое имя БД
-$username = 'root';
-$password = '';
+$host = 'localhost';
+$user = 'root';
+$pass = '';
+$db   = 'lab3_oop';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Ошибка подключения к базе: " . $e->getMessage());
+$connect = mysqli_connect($host, $user, $pass, $db);
+
+if (!$connect) {
+    die('Ошибка подключения к БД: ' . mysqli_connect_error());
 }
+
+mysqli_set_charset($connect, 'utf8mb4');
 ?>

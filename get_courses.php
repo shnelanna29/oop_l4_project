@@ -1,5 +1,8 @@
 <?php
-require 'db.php';
+session_start();
+require_once 'db.php';
+
+
 
 $stmt = $pdo->query("
     SELECT id, cours_name, date_start, date_finish, price, description
@@ -8,7 +11,7 @@ $stmt = $pdo->query("
 $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <h2>Курсы</h2>
-<table border="1">
+<table border="1" cellpadding="5" cellspacing="0">
     <tr>
         <th>ID</th>
         <th>Название</th>
@@ -28,4 +31,5 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
     <?php endforeach; ?>
 </table>
-<p><a href="index.php?page=admin">Назад</a></p>
+<br>
+<a href="index.php?page=admin">Назад</a>

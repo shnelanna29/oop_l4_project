@@ -1,97 +1,107 @@
 <?php
 session_start();
-require 'db.php';
+require_once 'db.php';
 
-$page = $_GET['page'] ?? '';
+$page = $_GET['page'] ?? 'home';
 ?>
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Курсы</title>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav>
-    <a href="?page=login">Авторизация</a>
-    <a href="?page=register">Регистрация</a>
-    <a href="?page=application">Подача заявки</a>
-    <a href="?page=review">Отзывы</a>
-    <a href="?page=admin">Админ панель</a>
+    <a href="index.php?page=login">Авторизация</a> |
+    <a href="index.php?page=register">Регистрация</a> |
+    <a href="index.php?page=application">Подача заявки</a> |
+    <a href="index.php?page=reviews">Отзывы</a> |
+    <a href="index.php?page=admin">Админ панель</a> |
+    <a href="index.php">Главная</a>
 </nav>
+<hr>
 
-<?php
-if ($page === 'login') {
-    ?>
+<?php if ($page === 'login'): ?>
+
     <h2>Авторизация</h2>
     <form method="post" action="login.php">
-        <label>Логин:
-            <input type="text" name="login" required>
-        </label>
-        <label>Пароль:
-            <input type="password" name="password" required>
-        </label>
-        <input type="submit" value="Войти">
+        <label>Логин:<br>
+            <input type="text" name="login">
+        </label><br><br>
+        <label>Пароль:<br>
+            <input type="password" name="password">
+        </label><br><br>
+        <button type="submit">Войти</button>
     </form>
-    <?php
-} elseif ($page === 'register') {
-    ?>
+
+<?php elseif ($page === 'register'): ?>
+
     <h2>Регистрация</h2>
     <form method="post" action="register.php">
-        <label>Логин:
-            <input type="text" name="login" required>
-        </label>
-        <label>Пароль:
-            <input type="password" name="password" required>
-        </label>
-        <label>ФИО:
-            <input type="text" name="fullname" required>
-        </label>
-        <label>Телефон:
+        <label>Логин:<br>
+            <input type="text" name="login">
+        </label><br><br>
+        <label>Пароль:<br>
+            <input type="password" name="password">
+        </label><br><br>
+        <label>ФИО:<br>
+            <input type="text" name="fio">
+        </label><br><br>
+        <label>Телефон:<br>
             <input type="text" name="phone">
-        </label>
-        <label>Email:
+        </label><br><br>
+        <label>Email:<br>
             <input type="email" name="email">
-        </label>
-        <input type="submit" value="Зарегистрироваться">
+        </label><br><br>
+        <button type="submit">Зарегистрироваться</button>
     </form>
-    <?php
-} elseif ($page === 'application') {
 
-    // курсы из cours_name
-    $courses = $pdo->query("SELECT id, cours_name FROM cours_name")->fetchAll(PDO::FETCH_ASSOC);
-    $cashTypes = $pdo->query("SELECT id, cash_type FROM cash_type")->fetchAll(PDO::FETCH_ASSOC);
-    ?>
+<?php elseif ($page === 'application'): ?>
+
     <h2>Подача заявки</h2>
+    <?php
+    if (!isset($_SESSION['user_id'])) {
+        echo "Войдите в систему, чтобы оставить заявку.";
+        echo '<br><a href="index.php?page=login">Войти</a>';
+    } else {
+        $courses = $pdo->query("SELECT id, cours_name FROM cours_name")
+                       ->fetchAll(PDO::FETCH_ASSOC);
+        $cashTypes = $pdo->query("SELECT id, cash_type FROM cash_type")
+                         ->fetchAll(PDO::FETCH_ASSOC);
+    ?>
     <form method="post" action="apply.php">
-        <label>Курс:
-            <select name="cours_fk" required>
+        <label>Курс:<br>
+            <select name="cours_fk">
                 <?php foreach ($courses as $c): ?>
                     <option value="<?= htmlspecialchars($c['id']) ?>">
                         <?= htmlspecialchars($c['cours_name']) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
-        </label>
-        <label>Желаемая дата старта:
-            <input type="date" name="date" required>
-        </label>
-        <label>Способ оплаты:
-            <select name="cash_fk" required>
+        </label><br><br>
+        <label>Желаемая дата старта:<br>
+            <input type="date" name="date">
+        </label><br><br>
+        <label>Способ оплаты:<br>
+            <select name="cash_fk">
                 <?php foreach ($cashTypes as $ct): ?>
                     <option value="<?= htmlspecialchars($ct['id']) ?>">
                         <?= htmlspecialchars($ct['cash_type']) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
-        </label>
-        <input type="submit" value="Отправить заявку">
+        </label><br><br>
+        <button type="submit">Отправить заявку</button>
     </form>
-    <?php
-} elseif ($page === 'review') {
+    <?php } ?>
 
+<?php elseif ($page === 'reviews'): ?>
+
+    <h2>Отзывы</h2>
+    <?php
     if (!isset($_SESSION['user_id'])) {
-        echo '<p>Войдите в систему, чтобы оставить отзыв. <a href="?page=login">Войти</a></p>';
+        echo "Войдите в систему, чтобы оставить отзыв.";
+        echo '<br><a href="index.php?page=login">Войти</a>';
     } else {
         $userId = $_SESSION['user_id'];
         $stmt = $pdo->prepare("
@@ -102,27 +112,28 @@ if ($page === 'login') {
         ");
         $stmt->execute([$userId]);
         $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        ?>
-        <h2>Добавить отзыв</h2>
-        <form method="post" action="review.php">
-            <label>Заявка / курс:
-                <select name="request_fk" required>
-                    <?php foreach ($requests as $r): ?>
-                        <option value="<?= htmlspecialchars($r['id']) ?>">
-                            <?= htmlspecialchars($r['cours_name']) ?> (заявка №<?= htmlspecialchars($r['id']) ?>)
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label>Текст отзыва:
-                <textarea name="review_text" required></textarea>
-            </label>
-            <input type="submit" value="Отправить отзыв">
-        </form>
-        <?php
-    }
-} elseif ($page === 'admin') {
     ?>
+    <h3>Добавить отзыв</h3>
+    <form method="post" action="review.php">
+        <label>Заявка / курс:<br>
+            <select name="request_fk">
+                <?php foreach ($requests as $r): ?>
+                    <option value="<?= htmlspecialchars($r['id']) ?>">
+                        <?= htmlspecialchars($r['cours_name']) ?>
+                        (заявка №<?= htmlspecialchars($r['id']) ?>)
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </label><br><br>
+        <label>Текст отзыва:<br>
+            <textarea name="review_text" rows="4" cols="50"></textarea>
+        </label><br><br>
+        <button type="submit">Отправить отзыв</button>
+    </form>
+    <?php } ?>
+
+<?php elseif ($page === 'admin'): ?>
+
     <h2>Админ панель</h2>
     <ul>
         <li><a href="get_users.php">Пользователи</a></li>
@@ -130,13 +141,13 @@ if ($page === 'login') {
         <li><a href="get_applications.php">Заявки</a></li>
         <li><a href="get_reviews.php">Отзывы</a></li>
     </ul>
-    <?php
-} else {
-    ?>
+
+<?php else: ?>
+
     <h2>Добро пожаловать!</h2>
     <p>Выберите раздел меню выше.</p>
-    <?php
-}
-?>
+
+<?php endif; ?>
+
 </body>
 </html>
