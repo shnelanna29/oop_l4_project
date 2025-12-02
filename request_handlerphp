@@ -1,0 +1,38 @@
+<?php
+session_start();
+if (empty($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+require_once 'db.php';
+
+$user_fk  = (int)$_SESSION['user_id'];
+$cours_fk = (int)($_POST['cours_fk'] ?? 0);
+$cash_fk  = (int)($_POST['cash_fk'] ?? 0);
+
+if ($cours_fk <= 0 || $cash_fk <= 0) {
+    $_SESSION['error'] = 'Выберите курс и тип оплаты';
+    header('Location: request_add.php');
+    exit;
+}
+
+$status_fk = 1;
+$date = date('Y-m-d');
+
+$sql = "INSERT INTO request (user_fk, cours_fk, status_fk, cash_fk, date)
+        VALUES (?, ?, ?, ?, ?)";
+$stmt = mysqli_prepare($connect, $sql);
+mysqli_stmt_bind_param($stmt, "iiiis", $user_fk, $cours_fk, $status_fk, $cash_fk, $date);
+
+if (mysqli_stmt_execute($stmt)) {
+    mysqli_stmt_close($stmt);
+    mysqli_close($connect);
+    header('Location: index.php');
+    exit;
+} else {
+    $_SESSION['error'] = 'Ошибка при добавлении заявки: ' . mysqli_error($connect);
+    mysqli_stmt_close($stmt);
+    mysqli_close($connect);
+    header('Location: request_add.php');
+    exit;
+}

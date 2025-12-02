@@ -10,5 +10,5 @@ if (!$connect) {
     die('Ошибка подключения к БД: ' . mysqli_connect_error());
 }
 
-mysqli_set_charset($connect, 'utf8mb4');
+mysqli_set_charset($connect, 'utf8');
 ?>
